@@ -1,70 +1,119 @@
 #include <stdio.h>
-#include <string.h> // For string functions
-#include <time.h>   // For date/time functions
+#include <string.h>
+#include <time.h>
 
-// Structure to hold candidate data
-typedef struct {
-    char name[30];
+#define NUM_CANDIDATES 6
+#define MAX_LENGTH 50
+
+struct Candidate {
+    char name[MAX_LENGTH];
     char dob[11]; // YYYY/MM/DD
     char gender;
-    char skills[30];
-    int age; // Added age
-} Candidate;
+    char email[MAX_LENGTH];
+    char nationality[MAX_LENGTH];
+    float bmi;
+    char primary[MAX_LENGTH];
+    char secondary[MAX_LENGTH];
+    int korean;
+    char mbti[5];
+    char intro[200];
+};
 
-int calculateAge(const char *dob) {
+int get_age(const char* dob) {
     int year, month, day;
     sscanf(dob, "%d/%d/%d", &year, &month, &day);
-
-    time_t now = time(0);
-    struct tm *currentTime = localtime(&now);
-
-    int currentYear = currentTime->tm_year + 1900;
-    int currentMonth = currentTime->tm_mon + 1;
-    int currentDay = currentTime->tm_mday;
-
-    int age = currentYear - year;
-
-    if (currentMonth < month || (currentMonth == month && currentDay < day)) {
-        age--; // Subtract 1 if birthday hasn't occurred yet this year
+    
+    time_t now = time(NULL);
+    struct tm *t = localtime(&now);
+    int age = t->tm_year + 1900 - year;
+    if (t->tm_mon + 1 < month || (t->tm_mon + 1 == month && t->tm_mday < day)) {
+        age--;
     }
-
     return age;
 }
 
 int main() {
-    // Store basic info for candidates
-    Candidate candidates[6]; // Using the struct
-
-    printf("=== K-Pop Audition Tracker ===\n\n");
-
+    struct Candidate candidates[NUM_CANDIDATES];
+    char group[MAX_LENGTH];
+    int i = 0;
+    
+    printf("Group name: ");
+    fgets(group, MAX_LENGTH, stdin);
+    group[strcspn(group, "\n")] = '\0';
+    
     // Input data
-    for (int i = 0; i < 6; i++) {
-        printf("\nCandidate %d:\n", i + 1);
-
+    printf("\n=== [%s] Candidate Entry ===\n", group);
+    while (i < NUM_CANDIDATES) {
+        printf("\nCandidate %d:\n", i+1);
+        
         printf("Name: ");
-        scanf("%s", candidates[i].name);
-
-        printf("Birthdate (YYYY/MM/DD): ");
-        scanf("%s", candidates[i].dob);
-
+        fgets(candidates[i].name, MAX_LENGTH, stdin);
+        candidates[i].name[strcspn(candidates[i].name, "\n")] = '\0';
+        
+        printf("DOB (YYYY/MM/DD): ");
+        fgets(candidates[i].dob, 11, stdin);
+        getchar();
+        
         printf("Gender (M/F): ");
         scanf(" %c", &candidates[i].gender);
-
-        printf("Main Skill: ");
-        scanf("%s", candidates[i].skills);
-
-        candidates[i].age = calculateAge(candidates[i].dob); // Calculate age
+        getchar();
+        
+        printf("Email: ");
+        fgets(candidates[i].email, MAX_LENGTH, stdin);
+        candidates[i].email[strcspn(candidates[i].email, "\n")] = '\0';
+        
+        printf("Nationality: ");
+        fgets(candidates[i].nationality, MAX_LENGTH, stdin);
+        candidates[i].nationality[strcspn(candidates[i].nationality, "\n")] = '\0';
+        
+        printf("BMI: ");
+        scanf("%f", &candidates[i].bmi);
+        getchar();
+        
+        printf("Primary skill: ");
+        fgets(candidates[i].primary, MAX_LENGTH, stdin);
+        candidates[i].primary[strcspn(candidates[i].primary, "\n")] = '\0';
+        
+        printf("Secondary skill: ");
+        fgets(candidates[i].secondary, MAX_LENGTH, stdin);
+        candidates[i].secondary[strcspn(candidates[i].secondary, "\n")] = '\0';
+        
+        printf("Korean level (0-4): ");
+        scanf("%d", &candidates[i].korean);
+        getchar();
+        
+        printf("MBTI: ");
+        fgets(candidates[i].mbti, 5, stdin);
+        getchar();
+        
+        printf("Introduction: ");
+        fgets(candidates[i].intro, 200, stdin);
+        candidates[i].intro[strcspn(candidates[i].intro, "\n")] = '\0';
+        
+        i++;
     }
-
-    // Display results
-    printf("\n=== Audition Candidates ===\n");
-    printf("No.  Name          Birthdate  Gender  Age  Skill\n");
-    printf("--------------------------------------------------\n");
-
-    for (int i = 0; i < 6; i++) {
-        printf("%-4d %-12s %-10s %-7c %-4d %s\n",
-               i + 1, candidates[i].name, candidates[i].dob, candidates[i].gender, candidates[i].age, candidates[i].skills);
+    
+    // Display data
+    printf("\n=== [%s] Candidate Review ===\n", group);
+    printf("==================================================================\n");
+    printf("%-15s | DOB      | G | Email           | Skill\n", "Name (Age)");
+    printf("==================================================================\n");
+    
+    for (i = 0; i < NUM_CANDIDATES; i++) {
+        char dob[9];
+        strncpy(dob, candidates[i].dob, 4);
+        strncpy(dob+4, candidates[i].dob+5, 2);
+        strncpy(dob+6, candidates[i].dob+8, 2);
+        dob[8] = '\0';
+        
+        printf("%-15s | %s | %c | %-15s | %s/%s\n", 
+               candidates[i].name, dob, candidates[i].gender, 
+               candidates[i].email, candidates[i].primary, candidates[i].secondary);
+        
+        printf("------------------------------------------------------------------\n");
+        printf("%s\n", candidates[i].intro);
+        printf("------------------------------------------------------------------\n");
     }
-
+    
     return 0;
 }
